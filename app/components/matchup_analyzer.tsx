@@ -18,12 +18,12 @@ export default function MatchupAnalyzer() {
     return (
         <Stack direction="row" spacing={3}>
             {[...Array(10).keys()].map(i =>
-                <Card sx={{ minWidth: 300 }} raised={true}>
+                <Card key={i} sx={{ minWidth: 300 }} raised={true}>
                     <CardHeader title='Matchup 1' />
                     <CardContent>
                         <Stack>
                             {[...Array(12).keys()].map(j =>
-                                <MatchupStat />
+                                <MatchupStat key={j} />
                             )}
                         </Stack>
                     </CardContent>
