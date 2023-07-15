@@ -53,7 +53,7 @@ export default function TeamTable() {
     return playerType === PLAYER_TYPE.BATTER ? batterColumns : pitcherColumns;
   }
 
-  const onTeamChange = (event: ChangeEvent) => {
+  const updateSelectedTeam = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedTeam(event.target.value as string);
   };
 
@@ -83,7 +83,7 @@ export default function TeamTable() {
             id="teams"
             value={selectedTeam}
             label="Team"
-            onChange={onTeamChange}
+            onChange={updateSelectedTeam}
             className="mr-3"
             select
           >
