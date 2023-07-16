@@ -2,44 +2,77 @@
 
 import Chip from "@mui/material/Chip";
 import MenuItem from "@mui/material/MenuItem";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
 import {
   DataGrid,
   GridColDef,
   GridColumnVisibilityModel,
 } from "@mui/x-data-grid";
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
-import { data } from "./data";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { Button, ButtonGroup, Divider, Stack, TextField } from "@mui/material";
-import { battedBallColumns, batterColumns, batterCountingColumns, batterRatioColumns, columnGroupingModel, pitcherColumns, pitcherCountingColumns, pitcherRatioColumns, plateDisciplineColumns, statcastColumns } from "./columns";
+import {
+  battedBallColumns,
+  batterColumns,
+  batterCountingColumns,
+  batterRatioColumns,
+  columnGroupingModel,
+  pitcherColumns,
+  pitcherCountingColumns,
+  pitcherRatioColumns,
+  plateDisciplineColumns,
+  statcastColumns,
+} from "./columns";
+import { PlayerData, PlayerType, Position } from "./datatypes";
 
-const PITCHER_POSITIONS = ["SP", "RP"];
-const BATTER_POSITIONS = ["C", "1B", "2B", "SS", "3B", "LF", "CF", "RF", "DH"];
-
-enum PLAYER_TYPE {
-  BATTER,
-  PITCHER,
-}
+const PITCHER_POSITIONS = [Position.STARTING_PITCHER, Position.RELIEF_PITCHER];
+const BATTER_POSITIONS = [
+  Position.CATCHER,
+  Position.FIRST_BASE,
+  Position.SECOND_BASE,
+  Position.SHORTSTOP,
+  Position.THIRD_BASE,
+  Position.LEFT_FIELD,
+  Position.CENTER_FIELD,
+  Position.RIGHT_FIELD,
+  Position.DESIGNATED_HITTER,
+];
 
 export default function TeamTable() {
-  const [selectedTeam, setSelectedTeam] = useState(data.filter(player => player.Team !== "Free Agent").map(player => player.Team)[0]);
-  const [playerType, setPlayerType] = useState(PLAYER_TYPE.BATTER);
-  const [showCountingStats, setShowCountingStats] = useState(true);
-  const [showRatioStats, setShowRatioStats] = useState(true);
-  const [showStatcastStats, setShowStatcastStats] = useState(true);
-  const [showPlateDisciplineStats, setShowPlateDisciplineStats] =
-    useState(true);
-  const [showBattedBallStats, setShowBattedBallStats] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<PlayerData[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState("Free Agent");
+  const [playerType, setPlayerType] = useState(PlayerType.BATTER);
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(
       { Team: false } /** team is selected via dropdown */
     );
 
+  useEffect(() => {
+    async function fetchPlayerData() {
+      const res = await fetch("/api/getPlayerData");
+      const data = (await res.json()) as PlayerData[];
+      setData(data);
+      setLoading(false);
+      setSelectedTeam(
+        data
+          .filter((player) => player.Team !== "Free Agent")
+          .map((player) => player.Team)[0]
+      );
+    }
+
+    fetchPlayerData();
+  }, []);
+
   function getRows() {
     return data
       .filter((player) => player.Team === selectedTeam)
       .filter((player) =>
-        playerType === PLAYER_TYPE.BATTER
+        playerType === PlayerType.BATTER
           ? player["Eligible Positions"].some((position) =>
               BATTER_POSITIONS.includes(position)
             )
@@ -50,19 +83,10 @@ export default function TeamTable() {
   }
 
   function getColumns() {
-    return playerType === PLAYER_TYPE.BATTER ? batterColumns : pitcherColumns;
+    return playerType === PlayerType.BATTER ? batterColumns : pitcherColumns;
   }
 
-  const updateSelectedTeam = (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedTeam(event.target.value as string);
-  };
-
-  function toggleColumns(
-    showStat: boolean,
-    showStatSetter: Dispatch<SetStateAction<boolean>>,
-    columns: GridColDef[]
-  ) {
-    showStatSetter(!showStat);
+  function toggleColumns(showStat: boolean, columns: GridColDef[]) {
     setColumnVisibilityModel({
       ...columnVisibilityModel,
       ...columns
@@ -79,104 +103,27 @@ export default function TeamTable() {
     <div style={{ width: "100%" }}>
       <div className="mb-3 flex justify-between items-end">
         <Stack direction="row" spacing={1} className="items-end">
-          <TextField
-            id="teams"
-            value={selectedTeam}
-            label="Team"
-            onChange={updateSelectedTeam}
-            className="mr-3"
-            select
-          >
-            {[...new Set(data.filter((player) => player.Team !== "Free Agent").map((player) => player.Team))].map((team) => (
-              <MenuItem key={team} value={team}>{team}</MenuItem>
-            ))}
-            <Divider />
-            <MenuItem value="Free Agent">Free Agents</MenuItem>
-          </TextField>
-          <ButtonGroup>
-            <Button
-              variant={
-                playerType === PLAYER_TYPE.BATTER ? "contained" : "outlined"
-              }
-              onClick={() => setPlayerType(PLAYER_TYPE.BATTER)}
-            >
-              Batters
-            </Button>
-            <Button
-              variant={
-                playerType === PLAYER_TYPE.PITCHER ? "contained" : "outlined"
-              }
-              onClick={() => setPlayerType(PLAYER_TYPE.PITCHER)}
-            >
-              Pitchers
-            </Button>
-          </ButtonGroup>
-          </Stack>
-        <Stack direction="row" spacing={1}>
-          <Chip
-            label="Counting"
-            variant={showCountingStats ? undefined : "outlined"}
-            color="primary"
-            onClick={() =>
-              toggleColumns(
-                showCountingStats,
-                setShowCountingStats,
-                [...batterCountingColumns, ...pitcherCountingColumns]
-              )
-            }
+          <TeamSelector
+            selectedTeam={selectedTeam}
+            setSelectedTeam={setSelectedTeam}
+            teams={[
+              ...new Set(
+                data
+                  .filter((player) => player.Team !== "Free Agent")
+                  .map((player) => player.Team)
+              ),
+            ]}
           />
-          <Chip
-            label="Ratios"
-            variant={showRatioStats ? undefined : "outlined"}
-            color="primary"
-            onClick={() =>
-              toggleColumns(
-                showRatioStats,
-                setShowRatioStats,
-                [...batterRatioColumns, ...pitcherRatioColumns]
-              )
-            }
-          />
-          <Chip
-            label="Statcast"
-            variant={showStatcastStats ? undefined : "outlined"}
-            color="primary"
-            onClick={() =>
-              toggleColumns(
-                showStatcastStats,
-                setShowStatcastStats,
-                statcastColumns
-              )
-            }
-          />
-          <Chip
-            label="Plate Discipline"
-            variant={showPlateDisciplineStats ? undefined : "outlined"}
-            color="primary"
-            onClick={() =>
-              toggleColumns(
-                showPlateDisciplineStats,
-                setShowPlateDisciplineStats,
-                plateDisciplineColumns
-              )
-            }
-          />
-          <Chip
-            label="Batted Ball"
-            variant={showBattedBallStats ? undefined : "outlined"}
-            color="primary"
-            onClick={() =>
-              toggleColumns(
-                showBattedBallStats,
-                setShowBattedBallStats,
-                battedBallColumns
-              )
-            }
+          <PlayerTypeSelector
+            playerType={playerType}
+            setPlayerType={setPlayerType}
           />
         </Stack>
+        <ColumnVisibilityChips toggleColumns={toggleColumns} />
       </div>
       <div style={{ height: "600px" }}>
         <DataGrid
+          loading={loading}
           rows={getRows()}
           columns={getColumns()}
           experimentalFeatures={{ columnGrouping: true }}
@@ -186,8 +133,154 @@ export default function TeamTable() {
           onColumnVisibilityModelChange={(newModel) =>
             setColumnVisibilityModel(newModel)
           }
+          disableRowSelectionOnClick
         />
       </div>
     </div>
+  );
+}
+
+interface PlayerTypeSelectorProps {
+  playerType: PlayerType;
+  setPlayerType: Dispatch<SetStateAction<PlayerType>>;
+}
+function PlayerTypeSelector({
+  playerType,
+  setPlayerType,
+}: PlayerTypeSelectorProps) {
+  return (
+    <ButtonGroup>
+      <Button
+        variant={playerType === PlayerType.BATTER ? "contained" : "outlined"}
+        onClick={() => setPlayerType(PlayerType.BATTER)}
+      >
+        Batters
+      </Button>
+      <Button
+        variant={playerType === PlayerType.PITCHER ? "contained" : "outlined"}
+        onClick={() => setPlayerType(PlayerType.PITCHER)}
+      >
+        Pitchers
+      </Button>
+    </ButtonGroup>
+  );
+}
+
+interface TeamSelectorProps {
+  selectedTeam: string;
+  setSelectedTeam: Dispatch<SetStateAction<string>>;
+  teams: string[];
+}
+function TeamSelector({
+  selectedTeam,
+  setSelectedTeam,
+  teams,
+}: TeamSelectorProps) {
+  const updateSelectedTeam = (event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedTeam(event.target.value as string);
+  };
+
+  return (
+    <TextField
+      id="teams"
+      value={selectedTeam}
+      label="Team"
+      onChange={updateSelectedTeam}
+      className="mr-3"
+      select
+    >
+      {teams.map((team) => (
+        <MenuItem key={team} value={team}>
+          {team}
+        </MenuItem>
+      ))}
+      <Divider />
+      <MenuItem value="Free Agent">Free Agents</MenuItem>
+    </TextField>
+  );
+}
+
+function ColumnVisibilityChips({
+  toggleColumns,
+}: {
+  toggleColumns: (showStat: boolean, columns: GridColDef[]) => void;
+}) {
+  const [showCountingStats, setShowCountingStats] = useState(true);
+  const [showRatioStats, setShowRatioStats] = useState(true);
+  const [showStatcastStats, setShowStatcastStats] = useState(true);
+  const [showPlateDisciplineStats, setShowPlateDisciplineStats] =
+    useState(true);
+  const [showBattedBallStats, setShowBattedBallStats] = useState(true);
+
+  function toggleButtonAndColumns(
+    showStat: boolean,
+    showStatSetter: Dispatch<SetStateAction<boolean>>,
+    columns: GridColDef[]
+  ) {
+    showStatSetter(!showStat);
+    toggleColumns(showStat, columns);
+  }
+
+  return (
+    <Stack direction="row" spacing={1}>
+      <Chip
+        label="Counting"
+        variant={showCountingStats ? undefined : "outlined"}
+        color="primary"
+        onClick={() =>
+          toggleButtonAndColumns(showCountingStats, setShowCountingStats, [
+            ...batterCountingColumns,
+            ...pitcherCountingColumns,
+          ])
+        }
+      />
+      <Chip
+        label="Ratios"
+        variant={showRatioStats ? undefined : "outlined"}
+        color="primary"
+        onClick={() =>
+          toggleButtonAndColumns(showRatioStats, setShowRatioStats, [
+            ...batterRatioColumns,
+            ...pitcherRatioColumns,
+          ])
+        }
+      />
+      <Chip
+        label="Statcast"
+        variant={showStatcastStats ? undefined : "outlined"}
+        color="primary"
+        onClick={() =>
+          toggleButtonAndColumns(
+            showStatcastStats,
+            setShowStatcastStats,
+            statcastColumns
+          )
+        }
+      />
+      <Chip
+        label="Plate Discipline"
+        variant={showPlateDisciplineStats ? undefined : "outlined"}
+        color="primary"
+        onClick={() =>
+          toggleButtonAndColumns(
+            showPlateDisciplineStats,
+            setShowPlateDisciplineStats,
+            plateDisciplineColumns
+          )
+        }
+      />
+      <Chip
+        label="Batted Ball"
+        variant={showBattedBallStats ? undefined : "outlined"}
+        color="primary"
+        onClick={() =>
+          toggleButtonAndColumns(
+            showBattedBallStats,
+            setShowBattedBallStats,
+            battedBallColumns
+          )
+        }
+      />
+    </Stack>
   );
 }
