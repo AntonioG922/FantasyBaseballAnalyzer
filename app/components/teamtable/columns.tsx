@@ -1,10 +1,56 @@
 import {
   GridColDef,
   GridColumnGroupingModel,
+  GridComparatorFn,
   GridValueFormatterParams,
 } from "@mui/x-data-grid";
 
 const DEFAULT_STAT_WIDTH = 70;
+
+function lineupSlotOrder(lineupSlot: string) {
+  switch(lineupSlot) {
+      case "C":
+          return 1
+      case "1B":
+          return 2
+      case "2B":
+          return 3
+      case "3B":
+          return 4
+      case "SS":
+          return 5
+      case "2B/SS":
+          return 6
+      case "1B/3B":
+          return 7
+      case "LF":
+          return 8
+      case "CF":
+          return 9
+      case "RF":
+          return 10
+      case "OF":
+          return 11
+      case "UTIL":
+          return 12
+      case "P":
+          return 13
+      case "SP":
+          return 14
+      case "RP":
+          return 15
+      case "BE":
+          return 16
+      case "IL":
+          return 17
+      default:
+          return 18
+  }
+}
+
+const positionComparator: GridComparatorFn<string> = (r1: string, r2: string) => {
+  return lineupSlotOrder(r2) - lineupSlotOrder(r1);
+}
 
 export const fantasyInfoColumns: GridColDef[] = [
   {
@@ -16,10 +62,11 @@ export const fantasyInfoColumns: GridColDef[] = [
   },
   { type: "number", field: "Team", headerName: "Team", width: 160 },
   {
-    type: "number",
+    type: "string",
     field: "Lineup Slot",
     headerName: "Lineup Slot",
     width: 120,
+    sortComparator: positionComparator,
   },
   {
     type: "number",
