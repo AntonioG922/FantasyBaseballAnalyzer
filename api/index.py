@@ -1,9 +1,11 @@
 import json
 
+from os.path import join
 import pickle
 import jsonpickle
 from espn_api.baseball import League
 from flask import Flask
+
 # from unidecode import unidecode
 
 from constants import (
@@ -15,7 +17,9 @@ app = Flask(__name__)
 
 @app.route("/api/getPlayerData")
 def getPlayerData():
-    fangraphsStats = pickle.load(open("../pybaseballdata/playerdata.pkl", "rb"))
+    fangraphsStats = []
+    with open(join("pybaseballdata", "playerdata.pkl"), "rb") as file:
+        fangraphsStats = pickle.load(file)
 
     league = League(league_id=167157, year=2023)
     fantasyStats = getFantasyStats(league)
@@ -43,7 +47,7 @@ def getFantasyStatsForTeam(roster, teamName):
     for idx, player in enumerate(roster):
         fantasyStats.append(
             {
-                "Id": idx,
+                "id": idx,
                 "Name": player.name,
                 "Team": teamName,
                 "Lineup Slot": player.lineupSlot,
