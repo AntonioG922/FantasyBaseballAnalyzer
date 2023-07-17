@@ -1,2 +1,3 @@
 Flask==2.2.2
 espn_api==0.30.0
+jsonpickle==3.0.1
