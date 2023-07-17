@@ -1,27 +1,28 @@
 import json
 
+import pickle
 import jsonpickle
-import pandas as pd
 from espn_api.baseball import League
 from flask import Flask
-from unidecode import unidecode
+# from unidecode import unidecode
 
 from constants import (
     USELESS_POSITIONS,
-    lineupSlotOrder,
 )
 
 app = Flask(__name__)
 
+
 @app.route("/api/getPlayerData")
 def getPlayerData():
-    fangraphsStats = pd.read_pickle("../pybaseballdata/playerdata.txt")
+    fangraphsStats = pickle.load(open("../pybaseballdata/playerdata.pkl", "rb"))
 
     league = League(league_id=167157, year=2023)
+    fantasyStats = getFantasyStats(league)
 
-    playerData = combineFantasyAndStatsData(league, fangraphsStats)
+    playerData = combineFantasyAndFangraphsStats(fantasyStats, fangraphsStats)
 
-    return json.dumps(playerData.to_dict("records")).replace("NaN", "null")
+    return json.dumps(playerData).replace("NaN", "null")
 
 
 @app.route("/api/getLeagueInfo")
@@ -30,44 +31,45 @@ def getLeagueInfo():
     return jsonpickle.dumps(league)
 
 
-def getStatsForFantasyTeam(teamName, roster, playerStats):
-    return (
-        pd.DataFrame(
-            {
-                "Name": map(lambda player: player.name, roster),
-                "Team": teamName,
-                "Lineup Slot": map(lambda player: player.lineupSlot, roster),
-                "Eligible Positions": map(
-                    lambda player: list(
-                        filter(
-                            lambda slot: slot not in USELESS_POSITIONS,
-                            player.eligibleSlots,
-                        )
-                    ),
-                    roster,
-                ),
-            },
-        )
-        .merge(playerStats, how="left", on="Name")
-        .sort_values(by="Lineup Slot", key=lambda col: col.map(lineupSlotOrder))
-    )
-
-
-def combineFantasyAndStatsData(league, fangraphsStats):
-    playerData = getStatsForFantasyTeam(
-        "Free Agent", league.free_agents(), fangraphsStats
-    )
+def getFantasyStats(league):
+    fantasyStats = getFantasyStatsForTeam(league.free_agents(), "Free Agent")
     for team in league.teams:
-        playerData = pd.concat(
-            [
-                playerData,
-                getStatsForFantasyTeam(
-                    team.team_name,
-                    team.roster,
-                    fangraphsStats,
+        fantasyStats += getFantasyStatsForTeam(team.roster, team.team_name)
+    return fantasyStats
+
+
+def getFantasyStatsForTeam(roster, teamName):
+    fantasyStats = []
+    for idx, player in enumerate(roster):
+        fantasyStats.append(
+            {
+                "Id": idx,
+                "Name": player.name,
+                "Team": teamName,
+                "Lineup Slot": player.lineupSlot,
+                "Eligible Positions": list(
+                    filter(
+                        lambda slot: slot not in USELESS_POSITIONS,
+                        player.eligibleSlots,
+                    )
                 ),
-            ],
-            ignore_index=True,
+            }
         )
-    playerData["id"] = playerData.index
-    return playerData
+    return fantasyStats
+
+
+def addTeamName(players, teamName):
+    for player in players:
+        player["Team"] = teamName
+    return players
+
+
+def combineFantasyAndFangraphsStats(fantasyStats, fangraphsStats):
+    for player in fantasyStats:
+        fangraphsPlayerStats = next(
+            (p for p in fangraphsStats if p["Name"] == player["Name"]), None
+        )
+        if fangraphsPlayerStats is not None:
+            player.update(fangraphsPlayerStats)
+
+    return fantasyStats
