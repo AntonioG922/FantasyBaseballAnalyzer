@@ -8,9 +8,8 @@ from flask import Flask
 
 # from unidecode import unidecode
 
-from constants import (
-    USELESS_POSITIONS,
-)
+CURRENT_YEAR = 2023
+USELESS_POSITIONS = ["2B/SS", "1B/3B", "IF", "OF", "UTIL", "BE", "IL", "P"]
 
 app = Flask(__name__)
 
