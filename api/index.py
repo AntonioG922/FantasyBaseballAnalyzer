@@ -61,12 +61,6 @@ def getFantasyStatsForTeam(roster, teamName):
     return fantasyStats
 
 
-def addTeamName(players, teamName):
-    for player in players:
-        player["Team"] = teamName
-    return players
-
-
 def combineFantasyAndFangraphsStats(fantasyStats, fangraphsStats):
     for player in fantasyStats:
         fangraphsPlayerStats = next(
