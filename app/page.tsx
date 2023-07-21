@@ -6,9 +6,12 @@ import { Divider, Stack } from '@mui/material';
 
 export default function Home() {
   const leagueInfo = async () => {
-    const res = await fetch('/api/getLeagueInfo');
+    const start = Date.now();
+    const res = await fetch('/api/getEspnLeagueInfo');
     const data = await res.json();
     console.log(data);
+    const end = Date.now();
+    console.log(`Execution time: ${end - start} ms`);
   }
   const playerData = async () => {
     const start = Date.now();
@@ -25,7 +28,7 @@ export default function Home() {
         <TeamTable></TeamTable>
         <Divider variant='middle' />
         <button onClick={leagueInfo}>League Info</button>
-        <button onClick={playerData}>Player Data</button>
+        <button onClick={playerData}>Player Datas</button>
         {/* <MatchupAnalyzer></MatchupAnalyzer> */}
       </Stack>
     </main>
