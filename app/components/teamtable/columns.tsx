@@ -4,6 +4,7 @@ import {
   GridComparatorFn,
   GridValueFormatterParams,
 } from "@mui/x-data-grid";
+import {roundToHundredth, roundToThousandth, asPercent} from '../util/formatter';
 
 const DEFAULT_STAT_WIDTH = 70;
 
@@ -96,49 +97,49 @@ export const batterRatioColumns: GridColDef[] = [
     field: "AVG",
     headerName: "AVG",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "xBA",
     headerName: "xBA",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "OBP",
     headerName: "OBP",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "SLG",
     headerName: "SLG",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "xSLG",
     headerName: "xSLG",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "wOBA",
     headerName: "wOBA",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "xwOBA",
     headerName: "xwOBA",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
@@ -162,49 +163,49 @@ export const pitcherRatioColumns: GridColDef[] = [
     field: "ERA",
     headerName: "ERA",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
   {
     type: "number",
     field: "xERA",
     headerName: "xERA",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
   {
     type: "number",
     field: "WHIP",
     headerName: "WHIP",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
   {
     type: "number",
     field: "FIP",
     headerName: "FIP",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
   {
     type: "number",
     field: "xFIP",
     headerName: "xFIP",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
   {
     type: "number",
     field: "K/9",
     headerName: "K/9",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
   {
     type: "number",
     field: "BB/9",
     headerName: "BB/9",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToHundredth,
+    valueFormatter: (params) => roundToHundredth(params.value),
   },
 ];
 
@@ -228,7 +229,7 @@ export const statcastColumns: GridColDef[] = [
     field: "Barrel%",
     headerName: "Barrel%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
@@ -241,7 +242,7 @@ export const statcastColumns: GridColDef[] = [
     field: "HardHit%",
     headerName: "HardHit%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
 ];
 
@@ -251,91 +252,91 @@ export const plateDisciplineColumns: GridColDef[] = [
     field: "BB%",
     headerName: "BB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "K%",
     headerName: "K%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "O-Swing%",
     headerName: "O-Swing%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Z-Swing%",
     headerName: "Z-Swing%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Swing%",
     headerName: "Swing%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "O-Contact%",
     headerName: "O-Contact%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Z-Contact%",
     headerName: "Z-Contact%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Contact%",
     headerName: "Contact%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Zone%",
     headerName: "Zone%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "F-Strike%",
     headerName: "F-Strike%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "SwStr%",
     headerName: "SwStr%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "CStr%",
     headerName: "CStr%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "CSW%",
     headerName: "CSW%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
 ];
 
@@ -345,63 +346,63 @@ export const battedBallBatterColumns: GridColDef[] = [
     field: "BABIP",
     headerName: "BABIP",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "LD%",
     headerName: "LD%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "GB%",
     headerName: "GB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "FB%",
     headerName: "FB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "IFFB%",
     headerName: "IFFB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "HR/FB",
     headerName: "HR/FB",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Pull%",
     headerName: "Pull%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Cent%",
     headerName: "Cent%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "Oppo%",
     headerName: "Oppo%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
 ];
 
@@ -411,42 +412,42 @@ export const battedBallColumns: GridColDef[] = [
     field: "BABIP",
     headerName: "BABIP",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: roundToThousandth,
+    valueFormatter: (params) => roundToThousandth(params.value),
   },
   {
     type: "number",
     field: "LD%",
     headerName: "LD%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "GB%",
     headerName: "GB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "FB%",
     headerName: "FB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "IFFB%",
     headerName: "IFFB%",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
   {
     type: "number",
     field: "HR/FB",
     headerName: "HR/FB",
     width: DEFAULT_STAT_WIDTH,
-    valueFormatter: asPercent,
+    valueFormatter: (params) => asPercent(params.value),
   },
 ];
 
@@ -524,24 +525,3 @@ export const columnGroupingModel: GridColumnGroupingModel = [
     }),
   },
 ];
-
-function roundToHundredth(params: GridValueFormatterParams<number>) {
-  if (params.value == null) {
-    return "";
-  }
-  return params.value.toFixed(2);
-}
-
-function roundToThousandth(params: GridValueFormatterParams<number>) {
-  if (params.value == null) {
-    return "";
-  }
-  return params.value.toFixed(3);
-}
-
-function asPercent(params: GridValueFormatterParams<number>) {
-  if (params.value == null) {
-    return "";
-  }
-  return `${(params.value * 100).toFixed(1)}%`;
-}

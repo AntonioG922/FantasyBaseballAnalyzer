@@ -1,7 +1,7 @@
 "use client"
 
 import TeamTable from './components/teamtable/team_table';
-import MatchupAnalyzer from './components/matchup_analyzer';
+import MatchupAnalyzer from './components/matchupanalyzer/matchup_analyzer';
 import { Divider, Stack } from '@mui/material';
 
 export default function Home() {
@@ -21,15 +21,24 @@ export default function Home() {
     const end = Date.now();
     console.log(`Execution time: ${end - start} ms`);
   }
+  const boxScores = async () => {
+    const start = Date.now();
+    const res = await fetch('/api/getEspnBoxScores');
+    const data = await res.json();
+    console.log(data);
+    const end = Date.now();
+    console.log(`Execution time: ${end - start} ms`);
+  }
 
   return (
     <main className="flex min-h-screen flex-col p-24">
       <Stack spacing={5}>
         <TeamTable></TeamTable>
-        <Divider variant='middle' />
+        <Divider variant="middle" />
         <button onClick={leagueInfo}>League Info</button>
         <button onClick={playerData}>Player Datas</button>
-        {/* <MatchupAnalyzer></MatchupAnalyzer> */}
+        <button onClick={boxScores}>Box Scores</button>
+        <MatchupAnalyzer></MatchupAnalyzer>
       </Stack>
     </main>
   )
