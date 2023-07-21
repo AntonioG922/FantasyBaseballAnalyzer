@@ -71,28 +71,28 @@ function statOrder(stat: string) {
 }
 
 function statFormatter(stat: string, statValue: number) {
-    switch (stat) {
-        case "OBP":
-        case "SLG":
-            return roundToThousandth(statValue);
-        case "ERA":
-        case "WHIP":
-        case "K/9":
-            return roundToHundredth(statValue);
-        case "OUTS":
-            return (statValue/3).toFixed(0) + '.' + `${Math.floor(statValue%3)}`;
-        default:
-            return statValue;
-    }
+  switch (stat) {
+    case "OBP":
+    case "SLG":
+      return roundToThousandth(statValue);
+    case "ERA":
+    case "WHIP":
+    case "K/9":
+      return roundToHundredth(statValue);
+    case "OUTS":
+      return (statValue / 3).toFixed(0) + "." + `${Math.floor(statValue % 3)}`;
+    default:
+      return statValue;
+  }
 }
 
 function statName(stat: string) {
-    switch (stat) {
-        case "OUTS":
-            return "IP";
-        default:
-            return stat;
-    }
+  switch (stat) {
+    case "OUTS":
+      return "IP";
+    default:
+      return stat;
+  }
 }
 
 interface MatchupStats {
@@ -104,12 +104,12 @@ interface MatchupStats {
 
 function MatchupStatRow({ matchupStats }: { matchupStats: MatchupStats }) {
   return (
-    <Container align={"center"}>
-      <Grid container direction="row"  spacing={2}>
+    <Box textAlign={"center"}>
+      <Grid container direction="row" spacing={2}>
         <Grid item xs>
           {statFormatter(matchupStats.stat, matchupStats.opponentStatValue)}
         </Grid>
-        <Divider orientation="vertical" flexItem />
+        {/* <Divider orientation="vertical" flexItem /> */}
         <Grid item xs>
           {statFormatter(matchupStats.stat, matchupStats.statValue)}
         </Grid>
@@ -118,7 +118,7 @@ function MatchupStatRow({ matchupStats }: { matchupStats: MatchupStats }) {
         </Grid>
       </Grid>
       <Typography variant="caption">{statName(matchupStats.stat)}</Typography>
-    </Container>
+    </Box>
   );
 }
 
@@ -147,7 +147,7 @@ function BoxScoreCard({
         className="text-center"
       />
       <CardContent>
-        <Grid container align={"center"}>
+        <Grid container justifyContent={"center"} alignContent={"center"}>
           <Grid item xs>
             <Avatar src={opponentBoxScore.team.logo_url} />
             <Typography variant="caption">
