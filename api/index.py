@@ -5,7 +5,7 @@ import pickle
 import jsonpickle
 from espn_api.baseball import League
 from flask import Flask
-from ../python/timed_lru_cache import timed_lru_cache
+from python.timed_lru_cache import timed_lru_cache
 
 # from unidecode import unidecode
 
@@ -22,7 +22,7 @@ def getPlayerData():
     with open(join("pybaseballdata", "playerdata.pkl"), "rb") as file:
         fangraphsStats = pickle.load(file)
 
-    fantasyStats = getFantasyStats(fetchEspnLeagueInfo(league_id=MY_LEAGUE_ID))
+    fantasyStats = getFantasyStats(fetchEspnLeagueInfo(MY_LEAGUE_ID))
 
     playerData = combineFantasyAndFangraphsStats(fantasyStats, fangraphsStats)
 
@@ -31,7 +31,7 @@ def getPlayerData():
 
 @app.route("/api/getEspnLeagueInfo")
 def getEspnLeagueInfo():
-    return jsonpickle.dumps(fetchEspnLeagueInfo=MY_LEAGUE_ID)
+    return jsonpickle.dumps(fetchEspnLeagueInfo(MY_LEAGUE_ID))
 
 @timed_lru_cache(seconds=60*60*4)
 def fetchEspnLeagueInfo(leagueId):

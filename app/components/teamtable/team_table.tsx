@@ -145,14 +145,13 @@ export default function TeamTable() {
   );
 }
 
-interface PlayerTypeSelectorProps {
-  playerType: PlayerType;
-  setPlayerType: Dispatch<SetStateAction<PlayerType>>;
-}
 function PlayerTypeSelector({
   playerType,
   setPlayerType,
-}: PlayerTypeSelectorProps) {
+}: {
+  playerType: PlayerType;
+  setPlayerType: Dispatch<SetStateAction<PlayerType>>;
+}) {
   return (
     <ButtonGroup>
       <Button
@@ -171,16 +170,15 @@ function PlayerTypeSelector({
   );
 }
 
-interface TeamSelectorProps {
-  selectedTeam: string;
-  setSelectedTeam: Dispatch<SetStateAction<string>>;
-  teams: string[];
-}
 function TeamSelector({
   selectedTeam,
   setSelectedTeam,
   teams,
-}: TeamSelectorProps) {
+}: {
+  selectedTeam: string;
+  setSelectedTeam: Dispatch<SetStateAction<string>>;
+  teams: string[];
+}) {
   const updateSelectedTeam = (event: ChangeEvent<HTMLInputElement>) => {
     setSelectedTeam(event.target.value as string);
   };
