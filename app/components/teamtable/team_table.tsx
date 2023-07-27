@@ -28,6 +28,7 @@ import {
   statcastColumns,
 } from "./columns";
 import { PlayerData, PlayerType, Position } from "./datatypes";
+import TeamSelector from "../teamselector/teamselector";
 
 const PITCHER_POSITIONS = [Position.STARTING_PITCHER, Position.RELIEF_PITCHER];
 const BATTER_POSITIONS = [
@@ -42,10 +43,9 @@ const BATTER_POSITIONS = [
   Position.DESIGNATED_HITTER,
 ];
 
-export default function TeamTable() {
+export default function TeamTable({selectedTeamId}: {selectedTeamId: number}) {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PlayerData[]>([]);
-  const [selectedTeam, setSelectedTeam] = useState("Free Agent");
   const [playerType, setPlayerType] = useState(PlayerType.BATTER);
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(
@@ -58,11 +58,6 @@ export default function TeamTable() {
       const data = (await res.json()) as PlayerData[];
       setData(data);
       setLoading(false);
-      setSelectedTeam(
-        data
-          .filter((player) => player.Team !== "Free Agent")
-          .map((player) => player.Team)[0]
-      );
     }
 
     fetchPlayerData();
@@ -70,7 +65,7 @@ export default function TeamTable() {
 
   function getRows() {
     return data
-      .filter((player) => player.Team === selectedTeam)
+      .filter((player) => player.Team === selectedTeamId)
       .filter((player) =>
         playerType === PlayerType.BATTER
           ? player["Eligible Positions"].some((position) =>
@@ -103,17 +98,6 @@ export default function TeamTable() {
     <div style={{ width: "100%" }}>
       <div className="mb-3 flex justify-between items-end">
         <Stack direction="row" spacing={1} className="items-end">
-          <TeamSelector
-            selectedTeam={selectedTeam}
-            setSelectedTeam={setSelectedTeam}
-            teams={[
-              ...new Set(
-                data
-                  .filter((player) => player.Team !== "Free Agent")
-                  .map((player) => player.Team)
-              ),
-            ]}
-          />
           <PlayerTypeSelector
             playerType={playerType}
             setPlayerType={setPlayerType}
@@ -167,39 +151,6 @@ function PlayerTypeSelector({
         Pitchers
       </Button>
     </ButtonGroup>
-  );
-}
-
-function TeamSelector({
-  selectedTeam,
-  setSelectedTeam,
-  teams,
-}: {
-  selectedTeam: string;
-  setSelectedTeam: Dispatch<SetStateAction<string>>;
-  teams: string[];
-}) {
-  const updateSelectedTeam = (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedTeam(event.target.value as string);
-  };
-
-  return (
-    <TextField
-      id="teams"
-      value={selectedTeam}
-      label="Team"
-      onChange={updateSelectedTeam}
-      className="mr-3"
-      select
-    >
-      {teams.map((team) => (
-        <MenuItem key={team} value={team}>
-          {team}
-        </MenuItem>
-      ))}
-      <Divider />
-      <MenuItem value="Free Agent">Free Agents</MenuItem>
-    </TextField>
   );
 }
 

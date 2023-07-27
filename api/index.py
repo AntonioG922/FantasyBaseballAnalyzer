@@ -33,7 +33,7 @@ def getPlayerData():
 
 @app.route("/api/getEspnLeagueInfo")
 def getEspnLeagueInfo():
-    return jsonpickle.dumps(fetchEspnLeagueInfo(MY_LEAGUE_ID))
+    return jsonpickle.encode(fetchEspnLeagueInfo(MY_LEAGUE_ID), unpicklable=False)
 
 
 @app.route("/api/getEspnBoxScores")
@@ -65,20 +65,20 @@ def getBoxScoresForLeague(league):
 
 
 def getFantasyStats(league):
-    fantasyStats = getFantasyStatsForTeam(league.free_agents(), "Free Agent")
+    fantasyStats = getFantasyStatsForTeam(league.free_agents(), -1)
     for team in league.teams:
-        fantasyStats += getFantasyStatsForTeam(team.roster, team.team_name)
+        fantasyStats += getFantasyStatsForTeam(team.roster, team.team_id)
     return fantasyStats
 
 
-def getFantasyStatsForTeam(roster, teamName):
+def getFantasyStatsForTeam(roster, teamId):
     fantasyStats = []
     for idx, player in enumerate(roster):
         fantasyStats.append(
             {
                 "id": idx,
                 "Name": player.name,
-                "Team": teamName,
+                "Team": teamId,
                 "Lineup Slot": player.lineupSlot,
                 "Eligible Positions": list(
                     filter(

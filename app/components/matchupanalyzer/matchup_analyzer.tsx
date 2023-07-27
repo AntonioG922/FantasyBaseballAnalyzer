@@ -11,8 +11,18 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { BoxScore, MatchupBoxScores, TeamBoxScore, Winner } from "./datatypes";
-import { roundToHundredth, roundToThousandth } from "../util/formatter";
+import {
+  BoxScore,
+  MatchupBoxScores,
+  Result,
+  TeamBoxScore,
+  Winner,
+} from "./datatypes";
+import {
+  roundToHundredth,
+  roundToTenth,
+  roundToThousandth,
+} from "../util/formatter";
 
 function getIndividualTeamBoxScores(boxScore: BoxScore): {
   homeBoxScore: TeamBoxScore;
@@ -82,7 +92,7 @@ function statFormatter(stat: string, statValue: number) {
     case "OUTS":
       return (statValue / 3).toFixed(0) + "." + `${Math.floor(statValue % 3)}`;
     default:
-      return statValue;
+      return statValue % 1 === 0 ? statValue : roundToTenth(statValue);
   }
 }
 
@@ -102,16 +112,78 @@ interface MatchupStats {
   averageStatValue: number;
 }
 
+function userResult(
+  stat: string,
+  userStat: number,
+  opponentStat: number
+): Result {
+  switch (stat) {
+    case "ERA":
+    case "WHIP":
+      return userStat < opponentStat
+        ? Result.Win
+        : userStat > opponentStat
+        ? Result.Loss
+        : Result.Tie;
+    default:
+      return userStat > opponentStat
+        ? Result.Win
+        : userStat < opponentStat
+        ? Result.Loss
+        : Result.Tie;
+  }
+}
+
+function StatsDivider({
+  stat,
+  userStat,
+  opposingStat,
+}: {
+  stat: string;
+  userStat: number;
+  opposingStat: number;
+}) {
+  const result = userResult(stat, userStat, opposingStat);
+  return (
+    <Divider
+      flexItem
+      sx={{
+        width: "100%",
+        borderBottomWidth: 2,
+        bgcolor:
+          result === Result.Win
+            ? "green"
+            : result === Result.Loss
+            ? "red"
+            : "grey",
+      }}
+    />
+  );
+}
+
 function MatchupStatRow({ matchupStats }: { matchupStats: MatchupStats }) {
   return (
     <Box textAlign={"center"}>
-      <Grid container direction="row" spacing={2}>
+      <Grid container direction="row">
         <Grid item xs>
           {statFormatter(matchupStats.stat, matchupStats.opponentStatValue)}
         </Grid>
-        {/* <Divider orientation="vertical" flexItem /> */}
+        <Grid item xs={2} container alignContent={"center"}>
+          <StatsDivider
+            stat={matchupStats.stat}
+            userStat={matchupStats.statValue}
+            opposingStat={matchupStats.opponentStatValue}
+          />
+        </Grid>
         <Grid item xs>
           {statFormatter(matchupStats.stat, matchupStats.statValue)}
+        </Grid>
+        <Grid item xs={2} container alignContent={"center"}>
+          <StatsDivider
+            stat={matchupStats.stat}
+            userStat={matchupStats.statValue}
+            opposingStat={matchupStats.averageStatValue}
+          />
         </Grid>
         <Grid item xs>
           {statFormatter(matchupStats.stat, matchupStats.averageStatValue)}
@@ -139,35 +211,114 @@ function BoxScoreCard({
   const userIsHomeTeam = relevantBoxScore.home_team.team_id == teamId;
   const userBoxScore = userIsHomeTeam ? homeBoxScore : awayBoxScore;
   const opponentBoxScore = userIsHomeTeam ? awayBoxScore : homeBoxScore;
+  const userResultsAgainstLeague = matchupBoxScores.boxScores
+    .flatMap((boxScore) =>
+      boxScore.away_team.team_id === teamId
+        ? [boxScore.home_stats]
+        : boxScore.home_team.team_id === teamId
+        ? [boxScore.away_stats]
+        : [boxScore.home_stats, boxScore.away_stats]
+    )
+    .map((opponentStats) =>
+      Object.keys(opponentStats)
+        .filter((stat) => opponentStats[stat].result !== null)
+        .map((stat) =>
+          userBoxScore.stats[stat].value > opponentStats[stat].value
+            ? Result.Win
+            : userBoxScore.stats[stat].value < opponentStats[stat].value
+            ? Result.Loss
+            : Result.Tie
+        )
+    )
+    .flatMap((winsAndLosses) => winsAndLosses);
+  const numberOfOtherTeams = matchupBoxScores.boxScores.length * 2 - 1;
+  const userAverageWins =
+    userResultsAgainstLeague.filter((result) => result === Result.Win).length /
+    numberOfOtherTeams;
+  const userAverageLosses =
+    userResultsAgainstLeague.filter((result) => result === Result.Loss).length /
+    numberOfOtherTeams;
+  const matchupWinsMinusAverageWins = userBoxScore.wins - userAverageWins;
 
   return (
-    <Card sx={{ minWidth: 350 }} raised={true}>
+    <Card sx={{ minWidth: 350 }} variant="outlined">
       <CardHeader
         title={"Matchup " + matchupBoxScores.matchupPeriod}
-        className="text-center"
+        className="text-center pb-0"
       />
       <CardContent>
         <Grid container justifyContent={"center"} alignContent={"center"}>
-          <Grid item xs>
+          <Grid item xs container direction={"column"} alignItems={"center"}>
             <Avatar src={opponentBoxScore.team.logo_url} />
             <Typography variant="caption">
-              {opponentBoxScore.team.team_name}
+              {opponentBoxScore.team.team_abbrev}
             </Typography>
           </Grid>
-          <Grid item xs>
+          <Grid item xs={2}></Grid>
+          <Grid item xs container direction={"column"} alignItems={"center"}>
             <Avatar src={userBoxScore.team.logo_url} />
             <Typography variant="caption">
-              {userBoxScore.team.team_name}
+              {userBoxScore.team.team_abbrev}
             </Typography>
           </Grid>
-          <Grid item xs>
+          <Grid item xs={2}></Grid>
+          <Grid item xs container justifyContent={"center"}>
             <Avatar
               src={userBoxScore.team.logo_url}
               style={{ filter: "grayscale(100%)" }}
             />
-            <Typography variant="caption">{"League Average"}</Typography>
+            <Typography variant="caption">{"League"}</Typography>
           </Grid>
         </Grid>
+        <Grid container className="mb-2">
+          <Grid item xs textAlign={"center"}>
+            {opponentBoxScore.wins}
+          </Grid>
+          <Grid item xs={2} container alignContent={"center"}>
+            <StatsDivider
+              stat=""
+              userStat={userBoxScore.wins}
+              opposingStat={opponentBoxScore.wins}
+            />
+          </Grid>
+          <Grid item xs textAlign={"center"}>
+            {userBoxScore.wins}
+          </Grid>
+          <Grid item xs={2} container alignContent={"center"}></Grid>
+          <Grid item xs></Grid>
+        </Grid>
+        <Grid container className="mb-2">
+          <Grid item xs></Grid>
+          <Grid item xs={2} container alignContent={"center"}></Grid>
+          <Grid item xs textAlign={"center"}>
+            {roundToHundredth(userAverageWins)}
+          </Grid>
+          <Grid item xs={2} container alignContent={"center"}>
+            <StatsDivider
+              stat=""
+              userStat={userAverageWins}
+              opposingStat={userAverageLosses}
+            />
+          </Grid>
+          <Grid item xs textAlign="center">
+            {roundToHundredth(userAverageLosses)}
+          </Grid>
+        </Grid>
+        <Box
+          textAlign="center"
+          color={
+            matchupWinsMinusAverageWins > 0
+              ? "green"
+              : matchupWinsMinusAverageWins < 0
+              ? "red"
+              : "black"
+          }
+          paddingBottom={3}
+        >
+          {(matchupWinsMinusAverageWins > 0 ? "+" : "").concat(
+            roundToHundredth(matchupWinsMinusAverageWins)
+          )}
+        </Box>
         <Stack>
           {Object.keys(userBoxScore.stats)
             .filter((stat) => userBoxScore.stats[stat].result !== null)
@@ -189,7 +340,7 @@ function BoxScoreCard({
   );
 }
 
-export default function MatchupAnalyzer() {
+export default function MatchupAnalyzer({teamId}: {teamId: number}) {
   const [loading, setLoading] = useState(true);
   const [boxScores, setBoxScores] = useState<MatchupBoxScores[]>([]);
 
@@ -206,14 +357,18 @@ export default function MatchupAnalyzer() {
   }, []);
 
   return (
-    <Stack direction="row" spacing={3}>
-      {boxScores.map((boxScore) => (
-        <BoxScoreCard
-          key={boxScore.matchupPeriod}
-          matchupBoxScores={boxScore}
-          teamId={1}
-        ></BoxScoreCard>
-      ))}
-    </Stack>
+    <Box display="flex" justifyContent="center" alignItems="center">
+      <Container sx={{ overflow: "scroll" }}>
+        <Stack direction="row" spacing={3}>
+          {boxScores.reverse().map((boxScore) => (
+            <BoxScoreCard
+              key={boxScore.matchupPeriod}
+              matchupBoxScores={boxScore}
+              teamId={teamId}
+            ></BoxScoreCard>
+          ))}
+        </Stack>
+      </Container>
+    </Box>
   );
 }

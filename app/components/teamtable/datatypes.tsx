@@ -1,6 +1,6 @@
 export interface PlayerData {
   Name: string;
-  Team: string;
+  Team: number;
   "Lineup Slot": Position;
   "Eligible Positions": Position[];
   PA?: number;
