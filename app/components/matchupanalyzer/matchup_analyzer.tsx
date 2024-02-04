@@ -87,6 +87,9 @@ function statFormatter(stat: string, statValue: number) {
       return roundToThousandth(statValue);
     case "ERA":
     case "WHIP":
+        // Edge case where these can be infinity if 0 IP
+        if (typeof statValue === "string") {return 99.99}
+        return roundToHundredth(statValue);
     case "K/9":
       return roundToHundredth(statValue);
     case "OUTS":
@@ -346,11 +349,16 @@ export default function MatchupAnalyzer({teamId}: {teamId: number}) {
 
   useEffect(() => {
     async function fetchBoxScores() {
+
+    const start = Date.now();
+    console.log("I'm starting box scores")
       const res = await fetch("/api/getEspnBoxScores");
       const boxScores = (await res.json()) as MatchupBoxScores[];
       setBoxScores(boxScores);
       console.log(boxScores);
       setLoading(false);
+      const end = Date.now();
+      console.log(`Execution time: ${end - start} ms`);
     }
 
     fetchBoxScores();
